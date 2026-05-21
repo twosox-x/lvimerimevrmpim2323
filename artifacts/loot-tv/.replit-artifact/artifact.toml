@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "L00T.tv"
+version = "1.0.0"
+id = "artifacts/loot-tv"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19437
+
+[services.development]
+run = "pnpm --filter @workspace/loot-tv run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/loot-tv", "run", "build" ]
+publicDir = "artifacts/loot-tv/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19437"
+BASE_PATH = "/"

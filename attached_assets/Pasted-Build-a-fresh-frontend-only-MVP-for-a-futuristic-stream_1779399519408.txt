@@ -1,0 +1,602 @@
+Build a fresh frontend-only MVP for a futuristic streaming platform called L00T.tv.
+
+This is FRONTEND ONLY for now.
+Do not build a real backend.
+Do not build real streaming infrastructure.
+Do not build real wallet transactions.
+Do not add real smart contracts.
+Use mock data and polished placeholder states.
+
+The goal is to create a beautiful, premium, interactive frontend prototype for:
+
+L00T.tv — a futuristic Base-native streaming platform where creators can go live, customize profiles, post updates, receive crypto donations, and sell simple 30-day subscriptions.
+
+Think:
+Twitch/Kick, but 10 years in the future.
+Dark theme.
+Light blue accent color.
+Premium glassmorphism.
+Crypto-native creator platform.
+Super engaging UI.
+Snappy CSS animations.
+High-end UX.
+
+Do not make it look like a boring SaaS dashboard.
+Do not make it flat and generic.
+Make it feel alive, futuristic, expensive, and interactive.
+
+MAIN VISUAL STYLE
+
+Use:
+- dark theme as the base
+- light blue accent color
+- glassmorphism panels
+- soft blur
+- thin glowing borders
+- subtle neon light-blue highlights
+- animated hover states
+- smooth transitions
+- premium card layouts
+- soft shadows
+- futuristic typography
+- animated background elements
+- polished responsive design
+
+Accent color:
+Use light blue/cyan as the main accent.
+
+Example colors:
+- background: near black / deep navy / charcoal
+- panels: translucent dark glass
+- accent: light blue / cyan
+- borders: faint blue glow
+- text: white / cool gray
+- secondary text: muted blue-gray
+
+Avoid:
+- purple-heavy design
+- green matrix style
+- generic Twitch clone look
+- ugly Web3 casino colors
+- overused gradients everywhere
+- boring static pages
+
+GLOBAL BACKGROUND
+
+The logo is a honeycomb shape.
+
+Every main page should have a subtle animated honeycomb background.
+
+Requirements:
+- simple animated honeycomb pattern
+- dark and subtle
+- should not overpower content
+- should feel like a living tech network
+- honeycombs can slowly drift, pulse, glow, or parallax
+- use light blue accents very softly
+- background should appear across all pages
+- keep performance good
+
+This can be done with CSS/SVG/canvas-style div pattern, but keep it frontend-simple and reliable.
+
+APP STRUCTURE
+
+Create these main pages:
+
+1. Home / Landing Page
+2. Explore / Live Streams Page
+3. Categories Page
+4. Stream Room Page
+5. Creator Profile Page
+6. Creator Dashboard Page
+7. Creator Signup Section/Page
+
+Use React with clean reusable components.
+Use Tailwind CSS if available.
+If not, use clean CSS modules or regular CSS.
+
+Use mock data for creators, streams, categories, posts, chat messages, donations, and subscriptions.
+
+NAVIGATION / SIDE MENU
+
+Build a very cool side menu.
+
+This is important.
+
+The side menu should:
+- sit on the left side of the app
+- start as a thin collapsed rail
+- expand into a thick full menu when the mouse cursor gets close or hovers over it
+- smoothly collapse when the cursor leaves
+- feel premium and futuristic
+- use snappy but smooth animation
+- show only icons when collapsed
+- show icons + labels when expanded
+- include soft blue glow on hover
+- include active route highlight
+- use glassmorphism
+- not cover content awkwardly
+- work on desktop
+
+Collapsed width example:
+- 68px
+
+Expanded width example:
+- 240px
+
+Menu items:
+- Home
+- Explore
+- Categories
+- Live
+- Creators
+- Dashboard
+- Become Creator
+
+The side menu should scale/expand as the mouse gets close, not only after hard clicking.
+If true cursor-distance detection is too much, use hover area around the sidebar to trigger expansion.
+The effect should feel like the menu is magnetically opening as the cursor approaches.
+
+Mobile:
+- use a bottom navigation bar or hamburger menu
+- keep it clean and premium
+
+HOME PAGE
+
+The homepage should feel like a futuristic streaming platform launch page.
+
+Sections:
+
+1. Hero
+- Big premium headline
+- Subheadline
+- CTA buttons:
+  - Watch Live
+  - Become a Creator
+- Floating glass cards showing mock live stats
+- Animated honeycomb background visible behind it
+
+Suggested headline:
+"Streaming, rebuilt for the onchain era."
+
+Suggested subheadline:
+"Go live, build a channel, earn crypto donations, and unlock subscriber-only content on L00T.tv."
+
+2. Live Now Preview
+- Horizontal or grid of live stream cards
+- Cards show:
+  - thumbnail/GIF placeholder
+  - creator PFP
+  - stream title
+  - category
+  - live badge
+  - viewer count
+  - donation/subscriber indicators
+
+3. How It Works
+Simple 3-step cards:
+- Create your channel
+- Go live with OBS
+- Earn with donations and 30-day subscriptions
+
+4. Categories Preview
+- Show animated GIF category cards
+- Link to full categories page
+
+5. Creator Signup CTA
+Preserve/create section with id:
+#creator-signup
+
+This section must exist.
+
+It should invite creators to join.
+Include:
+- display name input
+- username input
+- category select
+- channel color picker
+- wallet placeholder
+- submit/join waitlist button
+- mock success state
+
+No real backend submission.
+
+EXPLORE / LIVE STREAMS PAGE
+
+Create a premium live streams discovery page.
+
+Features:
+- search bar
+- category filter chips
+- live/offline filters
+- stream cards grid
+- viewer count sorting mock
+- beautiful hover animations
+- glass panels
+- active category state
+
+Stream cards should feel better than Twitch/Kick:
+- futuristic glass card
+- animated border glow on hover
+- thumbnail/GIF preview
+- live badge
+- creator PFP
+- creator name
+- stream title
+- category badge
+- viewers
+- donation/subscription mini indicators
+
+CATEGORIES PAGE
+
+This is very important.
+
+Build a cool categories page template made of squares and rectangles in a grid.
+
+The categories should use GIFs, not static images.
+
+Requirements:
+- masonry-like grid / bento grid
+- categories are squares and rectangles
+- biggest category should be 2x2
+- size should be based on mock viewer count
+- categories with more viewers appear larger
+- each category card has animated GIF background
+- overlay dark glass layer
+- category name
+- viewer count
+- live channels count
+- subtle blue glow on hover
+- card expands/slightly lifts on hover
+- snappy CSS animation
+- premium futuristic feel
+
+Example categories:
+- Games
+- Crypto
+- Launches
+- Trading
+- Art
+- Music
+- IRL
+- Dev Streams
+- Podcasts
+- Memes
+
+Games should be one of the biggest / featured categories.
+Use GIF placeholders or animated gradient blocks if real GIFs are not available, but structure the code so GIF URLs can be replaced easily later.
+
+Create category data like:
+
+{
+  id,
+  name,
+  slug,
+  description,
+  viewers,
+  liveChannels,
+  gifUrl,
+  accentColor,
+  size
+}
+
+The largest category should automatically get 2x2 styling based on viewers, or manually assign it in mock data.
+
+STREAM ROOM PAGE
+
+Create a futuristic stream watching page.
+
+Layout:
+- main video player area
+- live chat on the right
+- creator info below or beside video
+- donate button
+- subscribe button
+- top supporters panel
+- stream info/pinned message
+- related streams
+
+Video player:
+- placeholder only
+- regular Twitch-style streaming placeholder
+- no real streaming
+- no P2P
+- no WebRTC
+- show "RTMP/HLS playback placeholder"
+- include live badge and mock viewer count
+- animated loading/live overlay
+
+Live chat:
+- mock messages
+- normal messages
+- subscriber badge messages
+- donation messages
+- system messages
+- message input
+- wallet/connect placeholder
+- animated new message entrance
+- donation messages should glow/light up
+
+Donation UI:
+- modal or side panel
+- token selector:
+  - ETH
+  - L00T
+- preset amounts
+- custom amount
+- optional message
+- mock send button
+- mock success state
+
+Subscription UI:
+- simple 30-day subscription
+- no recurring billing
+- show:
+  - 0.01 ETH / 30 days
+  - 100,000 L00T / 30 days
+- unlocks subscriber-only posts and streams
+- mock active subscriber state
+
+CREATOR PROFILE PAGE
+
+Creator profiles should be very customizable.
+
+Each profile must support:
+- custom banner
+- PFP/avatar
+- display name
+- username
+- bio
+- channel color
+- category badge
+- live/offline state
+- social/wallet placeholder
+- subscribe button
+- donate button
+- public posts
+- subscriber-only locked posts
+- recent streams
+- top supporters
+- donation stats
+
+Profile customization feeling:
+- channel color should affect accent border/glow/buttons on that profile
+- banner should be large and premium
+- PFP should overlap banner like a modern creator page
+- profile should feel like a futuristic Twitch/Kick channel page
+
+Posts:
+- public posts visible
+- subscriber-only posts locked with glass blur and lock icon
+- "Subscribe for 30 days to unlock" CTA
+
+CREATOR DASHBOARD PAGE
+
+Create a dashboard for the creator.
+
+Frontend-only.
+
+Sections:
+
+1. Channel Customization
+- upload banner placeholder
+- upload PFP placeholder
+- display name input
+- username input
+- bio textarea
+- channel color picker
+- category select
+- preview profile card
+
+2. Stream Setup
+- stream title input
+- category select
+- stream access:
+  - Public
+  - Subscribers Only
+- RTMP URL placeholder
+- stream key placeholder
+- copy buttons
+- warning:
+  "Never share your stream key."
+- note:
+  "Backend will connect RTMP/HLS provider later."
+
+3. Posts
+- create post textarea
+- visibility:
+  - Public
+  - Subscribers Only
+- mock publish button
+- list of existing mock posts
+
+4. Monetization
+- ETH donation address placeholder
+- L00T token donation placeholder
+- 30-day subscription price:
+  - ETH price input
+  - L00T price input
+- subscriptions enabled toggle
+
+5. Supporters
+- recent donations
+- top supporters
+- subscriber count
+- mock revenue stats
+
+CREATOR SIGNUP
+
+The project must include #creator-signup.
+
+It can be on the homepage and/or its own page.
+
+Signup should feel exciting and premium.
+
+Fields:
+- creator name
+- username
+- primary category
+- channel color
+- short bio
+- wallet placeholder
+- CTA button
+
+No backend submission.
+Show mock success state.
+
+MOCK DATA
+
+Create clean mock data files.
+
+Suggested:
+- src/data/categories.ts
+- src/data/creators.ts
+- src/data/streams.ts
+- src/data/posts.ts
+- src/data/chat.ts
+- src/data/supporters.ts
+
+Mock data must include:
+- at least 10 categories
+- at least 8 creators
+- at least 8 streams
+- posts for creator profiles
+- chat messages
+- donation messages
+- subscriber states
+- custom channel colors
+- GIF URLs/placeholders for categories
+
+ANIMATIONS
+
+Use a lot of tasteful, snappy CSS animations.
+
+Important:
+- not slow and floaty
+- not too distracting
+- premium and responsive
+
+Add animations for:
+- sidebar expanding/collapsing
+- stream cards hover
+- category cards hover
+- chat messages appearing
+- live badges pulsing
+- buttons hover/tap
+- modal open/close
+- donation success
+- subscription success
+- honeycomb background
+- profile card hover
+- dashboard panels
+
+Use transitions like:
+- scale
+- opacity
+- blur
+- translateY
+- border glow
+- background glow
+- shimmer
+- subtle pulse
+
+PERFORMANCE
+
+Even though the UI should feel alive, keep it performant.
+
+Avoid:
+- huge unnecessary libraries
+- overusing canvas if not needed
+- too many heavy animated elements
+- unoptimized giant assets
+- crazy background effects that make scrolling lag
+
+Use CSS animations where possible.
+
+RESPONSIVE DESIGN
+
+The app must work on:
+- desktop
+- tablet
+- mobile
+
+Desktop:
+- expanding side menu
+
+Mobile:
+- bottom nav or hamburger
+- stream page should stack video above chat
+- category grid should adapt to smaller screens
+- dashboard should be usable
+
+FRONTEND ONLY PLACEHOLDERS
+
+Add clear TODO comments for future backend work, but only at major integration points.
+
+Examples:
+- TODO_BACKEND: persist creator profile
+- TODO_STREAMING: connect RTMP/HLS playback provider
+- TODO_PAYMENTS: send ETH donation on Base
+- TODO_PAYMENTS: call L00T ERC-20 transfer
+- TODO_SUBSCRIPTIONS: verify payment and create 30-day access pass
+- TODO_CHAT: replace mock chat with realtime backend
+- TODO_AUTH: connect wallet authentication
+
+Do not spam TODO comments everywhere.
+
+DO NOT BUILD
+
+Do not build:
+- backend
+- database
+- real streaming
+- WebRTC
+- P2P
+- smart contracts
+- real wallet transactions
+- auto-renewing subscriptions
+- clips
+- VOD
+- DMs
+- admin panel
+- bounties
+- disappearing messages
+- recommendation algorithm
+
+This is a frontend prototype/MVP shell.
+
+QUALITY BAR
+
+The final app should feel:
+- premium
+- futuristic
+- interactive
+- clean
+- modern
+- crypto-native
+- like Twitch/Kick evolved 10 years into the future
+
+Before finishing:
+- run the project
+- fix all errors
+- make sure all routes work
+- make sure navigation works
+- make sure mobile layout is not broken
+- make sure dark theme is consistent
+- make sure light blue accent is consistent
+- make sure the honeycomb background appears on all main pages
+- make sure the side menu expands/collapses smoothly
+- make sure categories page has GIF-based bento grid cards
+- make sure #creator-signup exists
+
+FINAL REPORT
+
+When done, report:
+1. Pages created
+2. Components created
+3. Mock data files created
+4. Styling/animation system added
+5. How the expanding side menu works
+6. How the categories bento grid works
+7. What is still placeholder-only
+8. Build/run result
