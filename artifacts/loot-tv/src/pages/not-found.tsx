@@ -1,7 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
+import { usePageMeta } from "@/lib/page-meta";
 
 export default function NotFound() {
+  usePageMeta(
+    "Page Not Found | L00T.tv",
+    "The requested L00T.tv page could not be found.",
+  );
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md mx-4">

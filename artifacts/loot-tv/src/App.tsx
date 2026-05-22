@@ -2,6 +2,8 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/context/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import NotFound from "@/pages/not-found";
 
 import HomePage from "@/pages/HomePage";
@@ -21,6 +23,7 @@ function Router() {
       <Route path="/explore" component={ExplorePage} />
       <Route path="/categories" component={CategoriesPage} />
       <Route path="/stream/:id" component={StreamRoomPage} />
+      <Route path="/@:username" component={CreatorProfilePage} />
       <Route path="/creator/:username" component={CreatorProfilePage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/creators" component={CreatorsPage} />
@@ -32,12 +35,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+            {/* Global auth modal — rendered outside page tree so it overlays everything */}
+            <AuthModal />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

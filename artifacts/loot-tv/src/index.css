@@ -141,6 +141,30 @@
 @layer base {
   * {
     @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(56, 189, 248, 0.25) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.2);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(56, 189, 248, 0.45);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   body {
@@ -170,6 +194,202 @@
 
 @utility neon-glow {
   text-shadow: 0 0 10px rgba(56, 189, 248, 0.5), 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+.loot-hero-title {
+  font-size: 2.25rem;
+  line-height: 0.98;
+  max-width: 10ch;
+}
+
+.loot-hero-copy {
+  font-size: 0.92rem;
+}
+
+.loot-hero-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.loot-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.loot-hero-mascot {
+  height: 176px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.loot-hero-mascot img {
+  max-height: 184px;
+}
+
+.loot-hero-mascot-mobile {
+  margin-top: -0.5rem;
+  margin-bottom: -0.75rem;
+}
+
+.categories-mobile-grid {
+  grid-auto-rows: 150px;
+}
+
+.category-card-compact video,
+.category-card-compact [style*="background-image"] {
+  filter: saturate(1.08) contrast(1.04);
+}
+
+.creator-card {
+  min-height: 0;
+}
+
+@media (max-width: 639px) {
+  .creator-card {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    min-height: 144px;
+  }
+
+  .creator-card-banner {
+    height: 100%;
+    min-height: 144px;
+  }
+
+  .creator-card-body {
+    align-items: stretch;
+    text-align: left;
+    padding: 0.7rem;
+    min-width: 0;
+  }
+
+  .creator-card-avatar {
+    position: absolute;
+    left: -1.95rem;
+    top: 0.8rem;
+    width: 3.35rem;
+    height: 3.35rem;
+    margin: 0;
+    border-width: 3px;
+  }
+
+  .creator-card-copy {
+    padding-left: 1.45rem;
+  }
+
+  .creator-card-bio {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 0.6rem;
+  }
+
+  .creator-card-action {
+    padding-top: 0.5rem;
+    margin-top: 0.1rem;
+  }
+
+  .creator-card-action button {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .creator-live-badge {
+    left: 0.45rem;
+    right: auto;
+    top: 0.45rem;
+    padding-inline: 0.4rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .categories-mobile-grid {
+    grid-auto-rows: 240px;
+  }
+}
+
+@media (min-width: 768px) {
+  .categories-mobile-grid {
+    grid-auto-rows: 352px;
+  }
+}
+
+@media (min-width: 390px) {
+  .loot-hero-title {
+    font-size: 2.75rem;
+  }
+
+  .loot-hero-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .loot-hero-mascot {
+    height: 198px;
+  }
+
+  .loot-hero-mascot img {
+    max-height: 208px;
+  }
+}
+
+@media (min-width: 640px) {
+  .loot-hero-title {
+    font-size: 2.25rem;
+    line-height: 1.05;
+    max-width: none;
+  }
+
+  .loot-hero-copy {
+    font-size: 1rem;
+  }
+
+  .loot-hero-actions {
+    display: flex;
+  }
+
+  .loot-hero-stats {
+    display: flex;
+  }
+
+  .loot-hero-mascot {
+    height: 200px;
+    max-width: none;
+    overflow: visible;
+  }
+
+  .loot-hero-mascot img {
+    max-height: none;
+  }
+
+  .loot-hero-mascot-desktop {
+    width: 260px;
+    height: 260px;
+  }
+}
+
+@media (min-width: 768px) {
+  .loot-hero-title {
+    font-size: 3rem;
+  }
+
+  .loot-hero-copy {
+    font-size: 1.125rem;
+  }
+
+  .loot-hero-mascot-desktop {
+    width: 360px;
+    height: 360px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .loot-hero-mascot-desktop {
+    width: 460px;
+    height: 460px;
+  }
 }
 
 @keyframes pulse-red {

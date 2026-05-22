@@ -1,16 +1,110 @@
+// Hexagon SVG path (pointy-top orientation)
+const HEX_PATH =
+  "M50,2 L93,26 L93,74 L50,98 L7,74 L7,26 Z";
+
+interface HexConfig {
+  id: number;
+  x: number;   // vw
+  y: number;   // vh
+  size: number; // px
+  opacity: number;
+  duration: number; // s
+  delay: number;    // s
+  rotate: number;   // deg initial
+  color: string;
+  blur: number;
+  driftX: number;   // px amplitude
+  driftY: number;
+  rotateAmt: number;
+}
+
+function seededRand(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+function buildHexagons(): HexConfig[] {
+  const r = seededRand(42);
+  const COLORS = ["#38bdf8", "#7dd3fc", "#a5f3fc", "#818cf8", "#c084fc"];
+  const configs: HexConfig[] = [];
+  for (let i = 0; i < 28; i++) {
+    configs.push({
+      id: i,
+      x: r() * 100,
+      y: r() * 120 - 10,
+      size: 30 + r() * 90,
+      opacity: 0.03 + r() * 0.1,
+      duration: 14 + r() * 22,
+      delay: -(r() * 20),
+      rotate: r() * 360,
+      color: COLORS[Math.floor(r() * COLORS.length)],
+      blur: r() > 0.65 ? 1 + r() * 3 : 0,
+      driftX: (r() - 0.5) * 60,
+      driftY: (r() - 0.5) * 80,
+      rotateAmt: (r() - 0.5) * 30,
+    });
+  }
+  return configs;
+}
+
+const HEXAGONS = buildHexagons();
+
 export function HoneycombBg() {
   return (
     <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-background">
-      <div 
-        className="absolute inset-0 animate-honeycomb opacity-10"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='69.28203230275509' viewBox='0 0 40 69.28203230275509' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%2338bdf8' stroke-width='1' fill='none' fill-rule='evenodd'%3E%3Cpath d='M40 17.32l-20 11.547L0 17.32V0h40v17.32zM0 51.961l20-11.547 20 11.547v17.32H0v-17.32z'/%3E%3Cpath d='M20 46.188L0 34.641l20-11.547 20 11.547-20 11.547z'/%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundSize: '80px 138.56px'
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] animate-pulse-red" style={{ animationDuration: '8s' }} />
-      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] animate-pulse-red" style={{ animationDuration: '12s', animationDelay: '2s' }} />
+      <style>{`
+        @media (prefers-reduced-motion: reduce) {
+          .hex-float { animation-duration: 120s !important; }
+        }
+        @keyframes hexFloat {
+          0%   { transform: translate(0px, 0px) rotate(var(--r0)); }
+          33%  { transform: translate(var(--dx), calc(var(--dy) * 0.5)) rotate(calc(var(--r0) + var(--dr) * 0.33)); }
+          66%  { transform: translate(calc(var(--dx) * -0.5), var(--dy)) rotate(calc(var(--r0) + var(--dr) * 0.66)); }
+          100% { transform: translate(0px, 0px) rotate(calc(var(--r0) + var(--dr))); }
+        }
+      `}</style>
+
+      {HEXAGONS.map((h) => (
+        <div
+          key={h.id}
+          className="hex-float absolute"
+          style={{
+            left: `${h.x}vw`,
+            top: `${h.y}vh`,
+            width: h.size,
+            height: h.size,
+            opacity: h.opacity,
+            filter: h.blur ? `blur(${h.blur}px)` : undefined,
+            animationName: "hexFloat",
+            animationDuration: `${h.duration}s`,
+            animationDelay: `${h.delay}s`,
+            animationTimingFunction: "ease-in-out",
+            animationIterationCount: "infinite",
+            animationDirection: "alternate",
+            ["--r0" as string]: `${h.rotate}deg`,
+            ["--dr" as string]: `${h.rotateAmt}deg`,
+            ["--dx" as string]: `${h.driftX}px`,
+            ["--dy" as string]: `${h.driftY}px`,
+          }}
+        >
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            <path
+              d={HEX_PATH}
+              stroke={h.color}
+              strokeWidth="1.5"
+              fill={h.color}
+              fillOpacity="0.04"
+              style={{ filter: `drop-shadow(0 0 4px ${h.color}60)` }}
+            />
+          </svg>
+        </div>
+      ))}
+
+      {/* Subtle depth gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/30 to-background/80" />
     </div>
   );
 }
