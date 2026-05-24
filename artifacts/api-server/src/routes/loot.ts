@@ -1,6 +1,7 @@
+import crypto from "node:crypto";
 import { Router, type IRouter } from "express";
 import rateLimit from "express-rate-limit";
-import { and, desc, eq, gte, ilike, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, lt, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   categories,
@@ -34,6 +35,7 @@ const router: IRouter = Router();
 const authLimiter = rateLimit({ windowMs: 60_000, limit: 20, standardHeaders: true, legacyHeaders: false });
 const chatLimiter = rateLimit({ windowMs: 10_000, limit: 8, standardHeaders: true, legacyHeaders: false });
 const paymentLimiter = rateLimit({ windowMs: 60_000, limit: 12, standardHeaders: true, legacyHeaders: false });
+const webhookLimiter = rateLimit({ windowMs: 60_000, limit: 60, standardHeaders: true, legacyHeaders: false });
 
 const walletSchema = z.object({ walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/) });
 const verifySchema = walletSchema.extend({ signature: z.string().min(20) });
@@ -77,6 +79,20 @@ const subscriptionVerifySchema = z.object({
   txHash: z.string().regex(/^0x[a-fA-F0-9]{64}$/),
   paymentToken: z.enum(["ETH", "L00T"]),
 });
+const subscriptionPlanSchema = z.object({
+  durationDays: z.number().int().min(1).max(365).optional(),
+  ethPrice: z.string().regex(/^\d+(\.\d{1,18})?$/).optional(),
+  lootPrice: z.string().regex(/^\d+(\.\d{1,18})?$/).optional(),
+  lootTokenAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional().or(z.literal("")),
+  isActive: z.boolean().optional(),
+});
+const streamWebhookSchema = z.object({
+  provider: z.string().min(1),
+  providerStreamId: z.string().min(1),
+  event: z.enum(["live", "ended", "offline"]),
+  playbackUrl: z.string().url().optional().or(z.literal("")),
+  viewerCount: z.number().int().min(0).optional(),
+});
 
 async function currentUserPayload(req: Parameters<typeof getSessionUser>[0]) {
   const user = await getSessionUser(req);
@@ -105,6 +121,13 @@ async function hasActiveSubscription(creatorId: string, userId?: string) {
   return !!sub;
 }
 
+async function expireOldSubscriptions(userId?: string) {
+  const where = userId
+    ? and(eq(subscriptions.subscriberUserId, userId), eq(subscriptions.status, "active"), lt(subscriptions.expiresAt, new Date()))
+    : and(eq(subscriptions.status, "active"), lt(subscriptions.expiresAt, new Date()));
+  await db.update(subscriptions).set({ status: "expired" }).where(where);
+}
+
 async function getCreatorByUsername(username: string) {
   const creator = await db.query.creatorProfiles.findFirst({
     where: eq(creatorProfiles.username, username),
@@ -115,6 +138,24 @@ async function getCreatorByUsername(username: string) {
 
 function publicStream(stream: typeof streams.$inferSelect) {
   return { ...stream, streamKeyEncrypted: undefined };
+}
+
+function timingSafeEqualText(left: string, right: string) {
+  const leftBuffer = Buffer.from(left);
+  const rightBuffer = Buffer.from(right);
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function verifyWebhookSignature(req: Parameters<typeof parseBody>[1]) {
+  if (!config.streamWebhookSecret) {
+    if (config.nodeEnv === "production") throw new HttpError(503, "STREAM_WEBHOOK_SECRET is required in production");
+    return;
+  }
+
+  const signature = req.header("x-loot-signature") ?? "";
+  if (!timingSafeEqualText(signature, config.streamWebhookSecret)) {
+    throw new HttpError(401, "Invalid stream webhook signature");
+  }
 }
 
 function routeParam(value: string | string[] | undefined, name: string) {
@@ -154,6 +195,8 @@ router.post(
 router.get(
   "/auth/me",
   asyncRoute(async (req, res) => {
+    const current = await getSessionUser(req);
+    if (current) await expireOldSubscriptions(current.id);
     res.json({ user: await currentUserPayload(req) });
   }),
 );
@@ -260,8 +303,10 @@ router.get(
     const stream = await db.query.streams.findFirst({ where: eq(streams.id, routeParam(req.params.id, "id")) });
     if (!stream) throw new HttpError(404, "Stream not found");
     const current = await getSessionUser(req);
+    const creator = await db.query.creatorProfiles.findFirst({ where: eq(creatorProfiles.id, stream.creatorId) });
+    const isOwner = current?.id === creator?.userId;
     const subscribed = await hasActiveSubscription(stream.creatorId, current?.id);
-    if (stream.accessType === "subscribers" && !subscribed) {
+    if (stream.accessType === "subscribers" && !subscribed && !isOwner) {
       return res.json({ stream: { ...publicStream(stream), playbackUrl: null }, locked: true });
     }
     return res.json({ stream: publicStream(stream), locked: false });
@@ -311,6 +356,7 @@ router.post(
       .set({ status: "live", startedAt: new Date(), endedAt: null, updatedAt: new Date() })
       .where(and(eq(streams.id, routeParam(req.params.id, "id")), eq(streams.creatorId, creator.id)))
       .returning();
+    if (!stream) throw new HttpError(404, "Stream not found");
     await db.update(creatorProfiles).set({ isLive: true }).where(eq(creatorProfiles.id, creator.id));
     res.json({ stream: publicStream(stream) });
   }),
@@ -325,8 +371,35 @@ router.post(
       .set({ status: "ended", endedAt: new Date(), updatedAt: new Date() })
       .where(and(eq(streams.id, routeParam(req.params.id, "id")), eq(streams.creatorId, creator.id)))
       .returning();
+    if (!stream) throw new HttpError(404, "Stream not found");
     await db.update(creatorProfiles).set({ isLive: false }).where(eq(creatorProfiles.id, creator.id));
     res.json({ stream: publicStream(stream) });
+  }),
+);
+
+router.post(
+  "/stream-webhooks/status",
+  webhookLimiter,
+  asyncRoute(async (req, res) => {
+    verifyWebhookSignature(req);
+    const body = parseBody(streamWebhookSchema, req);
+    const nextStatus = body.event === "live" ? "live" : body.event === "ended" ? "ended" : "offline";
+    const [stream] = await db
+      .update(streams)
+      .set({
+        status: nextStatus,
+        playbackUrl: body.playbackUrl || undefined,
+        viewerCount: body.viewerCount,
+        startedAt: nextStatus === "live" ? new Date() : undefined,
+        endedAt: nextStatus === "ended" || nextStatus === "offline" ? new Date() : undefined,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(streams.provider, body.provider), eq(streams.providerStreamId, body.providerStreamId)))
+      .returning();
+
+    if (!stream) throw new HttpError(404, "Stream not found");
+    await db.update(creatorProfiles).set({ isLive: nextStatus === "live" }).where(eq(creatorProfiles.id, stream.creatorId));
+    res.json({ ok: true, stream: publicStream(stream) });
   }),
 );
 
@@ -401,6 +474,7 @@ router.patch(
     const { creator } = await requireCreator(req);
     const body = parseBody(postSchema.partial(), req);
     const [post] = await db.update(posts).set({ ...body, updatedAt: new Date() }).where(and(eq(posts.id, routeParam(req.params.id, "id")), eq(posts.creatorId, creator.id))).returning();
+    if (!post) throw new HttpError(404, "Post not found");
     res.json({ post });
   }),
 );
@@ -417,8 +491,17 @@ router.delete(
 router.get(
   "/streams/:id/chat",
   asyncRoute(async (req, res) => {
+    const stream = await db.query.streams.findFirst({ where: eq(streams.id, routeParam(req.params.id, "id")) });
+    if (!stream) throw new HttpError(404, "Stream not found");
+    const current = await getSessionUser(req);
+    const creator = await db.query.creatorProfiles.findFirst({ where: eq(creatorProfiles.id, stream.creatorId) });
+    const isOwner = current?.id === creator?.userId;
+    const subscribed = await hasActiveSubscription(stream.creatorId, current?.id);
+    if (stream.accessType === "subscribers" && !subscribed && !isOwner) {
+      throw new HttpError(403, "Subscriber-only chat");
+    }
     const rows = await db.query.chatMessages.findMany({
-      where: eq(chatMessages.streamId, routeParam(req.params.id, "id")),
+      where: eq(chatMessages.streamId, stream.id),
       orderBy: [desc(chatMessages.createdAt)],
       limit: 100,
     });
@@ -452,6 +535,11 @@ router.post(
     const user = await requireUser(req);
     const body = parseBody(donationVerifySchema, req);
     const creator = await getCreatorByUsername(body.creatorUsername);
+    const existing = await db.query.donations.findFirst({ where: eq(donations.txHash, body.txHash) });
+    if (existing) {
+      res.json({ donation: existing, idempotent: true });
+      return;
+    }
     const creatorUser = await db.query.users.findFirst({ where: eq(users.id, creator.userId) });
     if (!creatorUser) throw new HttpError(404, "Creator wallet not found");
     const verified = await verifyBasePayment({
@@ -507,9 +595,41 @@ router.get(
   asyncRoute(async (req, res) => {
     const current = await getSessionUser(req);
     const creator = await getCreatorByUsername(routeParam(req.params.username, "username"));
+    if (current) await expireOldSubscriptions(current.id);
     const active = await hasActiveSubscription(creator.id, current?.id);
     const plan = await db.query.subscriptionPlans.findFirst({ where: eq(subscriptionPlans.creatorId, creator.id) });
     res.json({ active, plan });
+  }),
+);
+
+router.patch(
+  "/subscription-plans/me",
+  asyncRoute(async (req, res) => {
+    const { creator } = await requireCreator(req);
+    const body = parseBody(subscriptionPlanSchema, req);
+    const [plan] = await db
+      .insert(subscriptionPlans)
+      .values({
+        creatorId: creator.id,
+        durationDays: body.durationDays,
+        ethPrice: body.ethPrice,
+        lootPrice: body.lootPrice,
+        lootTokenAddress: body.lootTokenAddress || config.lootTokenAddress || null,
+        isActive: body.isActive,
+      })
+      .onConflictDoUpdate({
+        target: subscriptionPlans.creatorId,
+        set: {
+          durationDays: body.durationDays,
+          ethPrice: body.ethPrice,
+          lootPrice: body.lootPrice,
+          lootTokenAddress: body.lootTokenAddress || config.lootTokenAddress || null,
+          isActive: body.isActive,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    res.json({ plan });
   }),
 );
 
@@ -520,6 +640,11 @@ router.post(
     const user = await requireUser(req);
     const body = parseBody(subscriptionVerifySchema, req);
     const creator = await getCreatorByUsername(body.creatorUsername);
+    const existing = await db.query.subscriptions.findFirst({ where: eq(subscriptions.txHash, body.txHash) });
+    if (existing) {
+      res.json({ subscription: existing, idempotent: true });
+      return;
+    }
     const creatorUser = await db.query.users.findFirst({ where: eq(users.id, creator.userId) });
     const plan = await db.query.subscriptionPlans.findFirst({ where: eq(subscriptionPlans.creatorId, creator.id) });
     if (!creatorUser || !plan) throw new HttpError(404, "Creator subscription plan not found");
@@ -557,6 +682,7 @@ router.get(
   "/me/subscriptions",
   asyncRoute(async (req, res) => {
     const user = await requireUser(req);
+    await expireOldSubscriptions(user.id);
     const rows = await db.query.subscriptions.findMany({
       where: eq(subscriptions.subscriberUserId, user.id),
       orderBy: [desc(subscriptions.createdAt)],
@@ -571,8 +697,36 @@ router.get(
     const creator = await getCreatorByUsername(routeParam(req.params.username, "username"));
     const { creator: owner } = await requireCreator(req);
     if (owner.id !== creator.id) throw new HttpError(403, "Not your subscriber list");
+    await expireOldSubscriptions();
     const rows = await db.query.subscriptions.findMany({ where: eq(subscriptions.creatorId, creator.id) });
     res.json({ subscribers: rows });
+  }),
+);
+
+router.get(
+  "/creators/:username/supporters",
+  asyncRoute(async (req, res) => {
+    const creator = await getCreatorByUsername(routeParam(req.params.username, "username"));
+    const { creator: owner } = await requireCreator(req);
+    if (owner.id !== creator.id) throw new HttpError(403, "Not your supporter list");
+    const topDonors = await db
+      .select({
+        donorWallet: donations.donorWallet,
+        tokenSymbol: donations.tokenSymbol,
+        totalAmount: sql<string>`sum(${donations.amount})`,
+        donationCount: sql<number>`count(${donations.id})`,
+      })
+      .from(donations)
+      .where(and(eq(donations.creatorId, creator.id), eq(donations.status, "confirmed")))
+      .groupBy(donations.donorWallet, donations.tokenSymbol)
+      .orderBy(desc(sql`sum(${donations.amount})`))
+      .limit(25);
+    const activeSubscribers = await db.query.subscriptions.findMany({
+      where: and(eq(subscriptions.creatorId, creator.id), eq(subscriptions.status, "active"), gte(subscriptions.expiresAt, new Date())),
+      orderBy: [desc(subscriptions.createdAt)],
+      limit: 25,
+    });
+    res.json({ topDonors, activeSubscribers });
   }),
 );
 

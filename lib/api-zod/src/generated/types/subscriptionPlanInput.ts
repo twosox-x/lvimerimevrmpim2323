@@ -6,11 +6,10 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface SubscriptionPlan {
-  id?: string;
+export interface SubscriptionPlanInput {
   durationDays?: number;
   ethPrice?: string;
   lootPrice?: string;
+  lootTokenAddress?: string;
   isActive?: boolean;
-  [key: string]: unknown;
- }
+}

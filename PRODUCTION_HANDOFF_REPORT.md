@@ -1,6 +1,6 @@
 # L00T.tv Production Handoff Report
 
-Date: 2026-05-23
+Date: 2026-05-24
 
 ## Executive Summary
 
@@ -13,6 +13,7 @@ The main remaining production work is backend/devops integration:
 - choose and implement the streaming provider adapter
 - connect real Base RPC and L00T token configuration
 - complete frontend wallet transaction initiation
+- connect the selected streaming provider webhook to the provider-neutral status endpoint
 - run end-to-end auth, chat, payment, subscription, and stream-access tests
 - deploy frontend and API with production environment separation
 
@@ -58,6 +59,7 @@ Known non-blocking warnings:
 - Generated React client: `lib/api-client-react`
 - Generated Zod schemas: `lib/api-zod`
 - Category seed script: `scripts/src/seed-categories.ts`
+- Demo seed script: `scripts/src/seed-demo.ts`
 - Environment template: `.env.example`
 
 ## What Is Already Implemented
@@ -70,6 +72,9 @@ Known non-blocking warnings:
 - mobile bottom nav and hover sidebar
 - premium category video/GIF cards
 - route-specific metadata and favicon
+- shared default PFP asset wired across creator cards, stream cards, sidebar, stream room, and creator profiles
+- creator dashboard profile editor with display name, bio, channel color circles, local banner upload, and channel-color banner fallback
+- owner channel preview reflects dashboard state, including banner image/color, bio, stream category/title, and locally created posts
 - API helper with `VITE_API_BASE_URL`
 - realtime URL helper for WebSocket chat
 - wallet-first auth attempt through backend nonce/signature flow
@@ -86,8 +91,12 @@ Known non-blocking warnings:
 - users, creators, categories, streams, posts, chat, donations, subscriptions, and auth sessions tables
 - encrypted stream key storage using AES-256-GCM
 - stream provider abstraction with local `stub` provider
+- provider-neutral stream status webhook for live/offline updates
 - WebSocket chat server
 - server-side Base ETH and ERC-20/L00T payment verification logic
+- idempotent donation/subscription verification by transaction hash
+- creator-owned subscription plan update endpoint
+- owner-only supporter and subscriber ledger endpoints
 - rate limits for auth, chat, and payment-sensitive endpoints
 - CORS and Helmet
 - OpenAPI codegen working
@@ -106,6 +115,7 @@ Known non-blocking warnings:
 - `STREAM_PROVIDER=stub` is local-only
 - no real Livepeer, Mux, Cloudflare Stream, or LiveKit adapter is implemented yet
 - no provider webhook updates live/offline state yet
+- provider-neutral webhook endpoint exists, but a provider-specific adapter/signature mapping still needs to be connected
 - OBS ingest and playback have not been verified with a real provider
 
 ### Payments
@@ -113,6 +123,7 @@ Known non-blocking warnings:
 - no real Base RPC key has been tested
 - no real L00T token address has been supplied
 - frontend donation/subscription modals do not yet initiate real wallet transactions
+- frontend banner upload is local preview only; production should use a storage provider and persist the resulting URL to `creator_profiles.banner_url`
 - backend verification logic needs end-to-end testing with real transaction hashes
 - direct-to-creator payment recipient logic needs final product approval
 
@@ -128,6 +139,7 @@ Known non-blocking warnings:
 - critical flows need end-to-end tests:
   - wallet login
   - creator profile creation
+  - creator banner upload and persisted `banner_url` rendering
   - stream setup and stream-key owner access
   - subscriber-only posts/streams
   - chat send/read
@@ -149,6 +161,9 @@ BASE_RPC_URL=
 BASE_CHAIN_ID=8453
 L00T_TOKEN_ADDRESS=
 STREAM_PROVIDER=
+STREAM_WEBHOOK_SECRET=
+COOKIE_DOMAIN=
+COOKIE_SAMESITE=lax
 ```
 
 Production frontend:
@@ -211,13 +226,19 @@ pnpm --filter @workspace/db push
 pnpm --filter @workspace/scripts seed:categories
 ```
 
-8. Regenerate API clients after API contract changes:
+8. Seed optional demo data for local backend testing:
+
+```bash
+pnpm --filter @workspace/scripts seed:demo
+```
+
+9. Regenerate API clients after API contract changes:
 
 ```bash
 pnpm --filter @workspace/api-spec run codegen
 ```
 
-9. Run quality checks:
+10. Run quality checks:
 
 ```bash
 pnpm run typecheck
@@ -232,6 +253,7 @@ pnpm run build
 - set `DATABASE_URL`
 - run Drizzle push or convert schema to migrations if the deployment process requires immutable migrations
 - seed categories
+- seed demo creators/streams/posts in non-production environments
 - verify `/api/readiness` returns ready for database
 - test all basic read routes with real DB data
 
@@ -265,6 +287,7 @@ Acceptance criteria:
 - store stream key encrypted
 - return playback URL for stream room
 - implement provider webhook for live/offline status
+- map the provider webhook body/signature into `POST /api/stream-webhooks/status`
 
 Acceptance criteria:
 
@@ -283,6 +306,7 @@ Acceptance criteria:
 - wire frontend L00T ERC-20 transfer initiation
 - submit tx hash to backend verification endpoints
 - record donations/subscriptions after confirmation
+- keep repeated verification calls idempotent by transaction hash
 - enforce 30-day subscriber access from backend
 
 Acceptance criteria:

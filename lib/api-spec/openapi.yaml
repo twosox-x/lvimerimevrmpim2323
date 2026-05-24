@@ -16,6 +16,7 @@ tags:
   - name: chat
   - name: payments
   - name: stats
+  - name: webhooks
 paths:
   /healthz:
     get:
@@ -312,6 +313,31 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/StreamResponse" }
+  /stream-webhooks/status:
+    post:
+      operationId: streamStatusWebhook
+      tags: [webhooks]
+      parameters:
+        - name: x-loot-signature
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StreamStatusWebhookRequest" }
+      responses:
+        "200":
+          description: Stream status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  stream: { $ref: "#/components/schemas/Stream" }
+                required: [ok, stream]
   /streams/{id}/chat:
     get:
       operationId: getStreamChat
@@ -422,6 +448,7 @@ paths:
                 type: object
                 properties:
                   donation: { $ref: "#/components/schemas/Donation" }
+                  idempotent: { type: boolean }
                 required: [donation]
   /subscriptions/verify:
     post:
@@ -441,7 +468,27 @@ paths:
                 type: object
                 properties:
                   subscription: { $ref: "#/components/schemas/Subscription" }
+                  idempotent: { type: boolean }
                 required: [subscription]
+  /subscription-plans/me:
+    patch:
+      operationId: updateMySubscriptionPlan
+      tags: [payments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubscriptionPlanInput" }
+      responses:
+        "200":
+          description: Updated current creator subscription plan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan: { $ref: "#/components/schemas/SubscriptionPlan" }
+                required: [plan]
   /me/subscriptions:
     get:
       operationId: getMySubscriptions
@@ -529,6 +576,29 @@ paths:
                     type: array
                     items: { $ref: "#/components/schemas/Subscription" }
                 required: [subscribers]
+  /creators/{username}/supporters:
+    get:
+      operationId: getCreatorSupporters
+      tags: [payments]
+      parameters:
+        - { $ref: "#/components/parameters/Username" }
+      responses:
+        "200":
+          description: Top supporters for creator dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  topDonors:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  activeSubscribers:
+                    type: array
+                    items: { $ref: "#/components/schemas/Subscription" }
+                required: [topDonors, activeSubscribers]
   /creators/{username}/stats:
     get:
       operationId: getCreatorStats
@@ -738,6 +808,15 @@ components:
         amount: { type: string }
         message: { type: string }
       required: [creatorUsername, txHash, token, amount]
+    StreamStatusWebhookRequest:
+      type: object
+      properties:
+        provider: { type: string }
+        providerStreamId: { type: string }
+        event: { type: string, enum: [live, ended, offline] }
+        playbackUrl: { type: string }
+        viewerCount: { type: number }
+      required: [provider, providerStreamId, event]
     SubscriptionVerifyRequest:
       type: object
       properties:
@@ -769,6 +848,15 @@ components:
         durationDays: { type: number }
         ethPrice: { type: string }
         lootPrice: { type: string }
+        isActive: { type: boolean }
+    SubscriptionPlanInput:
+      type: object
+      properties:
+        durationDays: { type: number }
+        ethPrice: { type: string }
+        lootPrice: { type: string }
+        lootTokenAddress: { type: string }
+        isActive: { type: boolean }
     StatsResponse:
       type: object
       properties:

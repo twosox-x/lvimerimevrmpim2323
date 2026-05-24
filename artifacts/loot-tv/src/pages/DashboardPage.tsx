@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Link } from "wouter";
-import { Settings, Video, Edit3, DollarSign, Users, Copy, AlertTriangle, Eye, EyeOff, Radio, Check, Lock, PlusCircle, Trash2 } from "lucide-react";
+import { Settings, Video, Edit3, DollarSign, Users, Copy, AlertTriangle, Eye, EyeOff, Radio, Check, Lock, PlusCircle, Trash2, ImagePlus, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/api";
 import { usePageMeta } from "@/lib/page-meta";
@@ -16,6 +16,16 @@ const CATEGORIES = [
 ];
 const MOCK_STREAM_KEY = "live_loot_7f3a2b9c_d41e8cd98f00b204e9800998ecf";
 const RTMP_URL = "rtmp://ingest.l00t.tv/live";
+const CHANNEL_COLORS = [
+  "#38bdf8",
+  "#22d3ee",
+  "#a78bfa",
+  "#f472b6",
+  "#4ade80",
+  "#facc15",
+  "#fb923c",
+  "#f87171",
+];
 
 export default function DashboardPage() {
   usePageMeta(
@@ -40,8 +50,11 @@ export default function DashboardPage() {
 
   // Profile state
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
-  const [bio, setBio] = useState("");
+  const [bio, setBio] = useState(user?.bio ?? "");
+  const [channelColor, setChannelColor] = useState(user?.channelColor ?? "#38bdf8");
+  const [bannerUrl, setBannerUrl] = useState(user?.bannerUrl ?? "");
   const [profileSaved, setProfileSaved] = useState(false);
+  const [bannerError, setBannerError] = useState("");
 
   // Post state
   const [postContent, setPostContent] = useState("");
@@ -55,6 +68,7 @@ export default function DashboardPage() {
   }
 
   async function saveStream() {
+    updateProfile({ streamTitle, category: streamCategory });
     try {
       const result = streamId
         ? await apiRequest<{ stream: { id: string; ingestUrl?: string; streamKey?: string } }>(`/streams/${streamId}`, {
@@ -78,13 +92,39 @@ export default function DashboardPage() {
   }
 
   async function saveProfile() {
-    updateProfile({ displayName, bio });
+    updateProfile({ displayName, bio, channelColor, bannerUrl });
     await apiRequest("/creators/me", {
       method: "PATCH",
-      body: JSON.stringify({ displayName, bio, channelColor: user?.channelColor ?? "#38bdf8" }),
+      body: JSON.stringify({ displayName, bio, channelColor, bannerUrl }),
     }).catch(() => undefined);
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 2000);
+  }
+
+  function handleBannerUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setBannerError("Please choose an image file.");
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      setBannerError("Banner image must be under 3 MB for local preview.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setBannerUrl(reader.result);
+        setBannerError("");
+      }
+    };
+    reader.onerror = () => setBannerError("Could not read that image. Try another file.");
+    reader.readAsDataURL(file);
   }
 
   async function publishPost() {
@@ -143,7 +183,7 @@ export default function DashboardPage() {
             <p className="text-zinc-500 text-sm mt-0.5">Welcome back, <span className="text-primary">{user?.displayName}</span></p>
           </div>
           <div className="flex items-center gap-3">
-            <Link href={`/@${user?.username}`}>
+            <Link href={`/creator/${encodeURIComponent(user?.username ?? "")}`}>
               <button className="px-4 py-2 rounded-lg border border-white/10 glass-panel hover:bg-white/5 text-sm font-medium transition-all flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 My Channel
@@ -311,8 +351,93 @@ export default function DashboardPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1">Wallet Address</label>
-                    <input readOnly value={user?.walletAddress ?? ""} className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-zinc-500 font-mono text-sm" />
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <label className="block text-sm font-medium text-zinc-400">Channel Banner</label>
+                      <span className="text-xs text-zinc-600">Recommended 1600 x 450</span>
+                    </div>
+                    <div
+                      className="relative rounded-xl border border-white/10 overflow-hidden bg-black/30"
+                      style={bannerUrl ? { height: 172 } : { height: 172, backgroundColor: channelColor }}
+                    >
+                      {bannerUrl && (
+                        <img src={bannerUrl} alt="Channel banner preview" className="absolute inset-0 h-full w-full object-cover" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-br from-black/25 via-transparent to-black/30" />
+                      <div
+                        className="absolute inset-0 flex flex-col justify-between"
+                        style={{ padding: "20px 22px 18px" }}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/18 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white/75 backdrop-blur-sm">
+                            Preview
+                          </div>
+                          <div className="rounded-full border border-white/15 bg-black/18 px-3 py-1.5 text-[11px] text-white/70 backdrop-blur-sm">
+                            Channel header
+                          </div>
+                        </div>
+                        <div className="flex items-end gap-4">
+                          <div
+                            className="rounded-full border-2 border-white/80 overflow-hidden bg-zinc-900 shadow-[0_10px_28px_-14px_rgba(0,0,0,0.9)]"
+                            style={{ width: 64, height: 64 }}
+                          >
+                            <img src={user?.avatarUrl ?? "/PFP.jpg"} alt="" className="h-full w-full object-cover" />
+                          </div>
+                          <div style={{ paddingBottom: 5 }}>
+                            <p className="text-xl font-bold text-white leading-tight drop-shadow">{displayName || user?.displayName || "Creator"}</p>
+                            <p className="text-sm font-medium text-white/70">@{user?.username}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs text-zinc-500">
+                        {bannerUrl ? "Uploaded banner image is shown on your channel." : "No image uploaded. Your selected channel color is used as the banner."}
+                      </p>
+                      <div className="flex gap-2">
+                        {bannerUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBannerUrl("");
+                              setBannerError("");
+                            }}
+                            className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm font-bold text-zinc-300 hover:bg-white/5 hover:text-white transition-all"
+                          >
+                            <X className="w-4 h-4" />
+                            Remove
+                          </button>
+                        )}
+                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all">
+                          <ImagePlus className="w-4 h-4" />
+                          Upload Banner
+                          <input type="file" accept="image/*" onChange={handleBannerUpload} className="sr-only" />
+                        </label>
+                      </div>
+                    </div>
+                    {bannerError && <p className="mt-2 text-xs text-red-400">{bannerError}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Channel Color</label>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {CHANNEL_COLORS.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setChannelColor(color)}
+                          className="w-8 h-8 rounded-full border-2 transition-all hover:scale-110"
+                          style={{
+                            backgroundColor: color,
+                            borderColor: channelColor === color ? "#fff" : "transparent",
+                            boxShadow: channelColor === color ? `0 0 12px ${color}` : "none",
+                          }}
+                          aria-label={`Select ${color}`}
+                        />
+                      ))}
+                      <div className="ml-1 flex items-center gap-2 text-xs text-zinc-500">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: channelColor }} />
+                        <span className="font-mono uppercase">{channelColor}</span>
+                      </div>
+                    </div>
                   </div>
                   <button
                     onClick={saveProfile}

@@ -106,8 +106,9 @@ export async function createSession(res: Response, user: User) {
   await db.update(authSessions).set({ tokenHash: tokenHash(token) }).where(eq(authSessions.id, session.id));
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: config.nodeEnv === "production",
+    sameSite: config.cookieSameSite,
+    secure: config.nodeEnv === "production" || config.cookieSameSite === "none",
+    domain: config.cookieDomain || undefined,
     expires: expiresAt,
     path: "/",
   });
@@ -124,7 +125,7 @@ export async function destroySession(req: Request, res: Response) {
       // Ignore invalid logout tokens.
     }
   }
-  res.clearCookie(COOKIE_NAME, { path: "/" });
+  res.clearCookie(COOKIE_NAME, { path: "/", domain: config.cookieDomain || undefined });
 }
 
 export async function getSessionUser(req: Request) {

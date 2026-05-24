@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { User, Eye } from "lucide-react";
+import { DEFAULT_PROFILE_PICTURE } from "@/data/creators";
 
 export function StreamCard({ stream }: { stream: any }) {
   return (
@@ -24,7 +25,7 @@ export function StreamCard({ stream }: { stream: any }) {
         <div className="flex gap-3 px-1">
           <div className="relative">
             <div className="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden ring-2 ring-transparent group-hover:ring-primary transition-all">
-              <img src={stream.creator.avatar} alt={stream.creator.displayName} className="w-full h-full object-cover" />
+              <img src={stream.creator.avatar || DEFAULT_PROFILE_PICTURE} alt={stream.creator.displayName} className="w-full h-full object-cover" />
             </div>
           </div>
           <div className="flex flex-col overflow-hidden">

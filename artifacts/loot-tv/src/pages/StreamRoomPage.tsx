@@ -10,6 +10,7 @@ import { DonateModal } from "@/components/auth/DonateModal";
 import { SubscribeModal } from "@/components/auth/SubscribeModal";
 import { apiRequest, maybeApi, realtimeUrl } from "@/lib/api";
 import { usePageMeta } from "@/lib/page-meta";
+import { DEFAULT_PROFILE_PICTURE } from "@/data/creators";
 
 // Mock auto-chat messages for simulation
 const MOCK_AUTO_CHAT = [
@@ -169,7 +170,7 @@ export default function StreamRoomPage() {
           <div className="mt-4 px-6 flex flex-col md:flex-row gap-6 justify-between items-start">
             <div className="flex gap-4">
               <Link href={`/creator/${creator.username}`}>
-                <img src={creator.avatar} className="w-16 h-16 rounded-full bg-zinc-800 border-2 cursor-pointer hover:opacity-90 transition-opacity" style={{ borderColor: creator.channelColor }} alt={creator.displayName} />
+                <img src={creator.avatar || DEFAULT_PROFILE_PICTURE} className="w-16 h-16 rounded-full bg-zinc-800 border-2 cursor-pointer hover:opacity-90 transition-opacity" style={{ borderColor: creator.channelColor }} alt={creator.displayName} />
               </Link>
               <div>
                 <h1 className="text-xl font-bold text-white mb-1">{stream.title}</h1>

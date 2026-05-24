@@ -5,9 +5,9 @@
  * L00T.tv MVP API
  * OpenAPI spec version: 0.2.0
  */
-import type { Donation } from './donation';
+import type { Stream } from './stream';
 
-export type VerifyDonation201 = {
-  donation: Donation;
-  idempotent?: boolean;
+export type StreamStatusWebhook200 = {
+  ok: boolean;
+  stream: Stream;
 };

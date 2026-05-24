@@ -37,6 +37,7 @@ No UI, Clerk auth, Prisma schema, MongoDB model, or LiveKit SDK code was copied 
 - Base payment verification through JSON-RPC
 - AES-256-GCM encrypted stream keys
 - Provider abstraction in `src/lib/stream-provider.ts`
+- provider-neutral stream status webhook at `POST /api/stream-webhooks/status`
 - WebSocket chat at `/api/realtime`
 - OpenAPI spec updated in `lib/api-spec/openapi.yaml`
 - `/api/healthz` and `/api/readiness` are available before database setup; product routes return a clear `503` until `DATABASE_URL` is configured.
@@ -47,6 +48,7 @@ Implemented Drizzle tables:
 
 - `users`
 - `creator_profiles`
+  - includes `banner_url` and `channel_color`; frontend now has local banner upload UX and color fallback ready to connect to persistent storage
 - `categories`
 - `streams`
 - `posts`
@@ -74,7 +76,10 @@ Implemented endpoints cover auth, users/profiles, creators, categories, streams,
 - `POST /api/streams/:id/start`
 - `POST /api/streams/:id/end`
 - `POST /api/streams/:id/regenerate-key`
+- `POST /api/stream-webhooks/status`
 - `GET /api/creators/:username/live`
+- `PATCH /api/subscription-plans/me`
+- `GET /api/creators/:username/supporters`
 - post, chat, payment, subscription, and stats routes listed in the OpenAPI spec
 
 ## Streaming Decision
@@ -85,6 +90,7 @@ Production path:
 
 - set `STREAM_PROVIDER=livekit`, `livepeer`, `mux`, or `cloudflare`
 - implement adapter behind `StreamProvider`
+- translate provider webhooks into `POST /api/stream-webhooks/status`
 - keep DB/API/frontend contracts stable
 
 ## Auth Decision
@@ -111,4 +117,5 @@ Backend verifies Base transactions server-side:
 - Streaming provider adapter still needs final vendor credentials.
 - Frontend payment modals still need wallet transaction initiation.
 - OpenAPI codegen now runs through `pnpm --filter @workspace/api-spec codegen`; the zod package post-processes its index to avoid duplicate generated exports.
+- Demo backend data can be seeded with `pnpm --filter @workspace/scripts seed:demo` after categories are seeded.
 - Production launch still requires end-to-end verification against a real database, real Base RPC, and the selected streaming provider.

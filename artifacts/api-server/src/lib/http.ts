@@ -42,3 +42,7 @@ export function errorHandler(error: unknown, _req: Request, res: Response, _next
 export function normalizeAddress(address: string) {
   return address.trim().toLowerCase();
 }
+
+export function nullableEmpty(value: string | null | undefined) {
+  return value && value.trim() ? value.trim() : null;
+}

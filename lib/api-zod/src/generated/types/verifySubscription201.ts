@@ -9,4 +9,5 @@ import type { Subscription } from './subscription';
 
 export type VerifySubscription201 = {
   subscription: Subscription;
+  idempotent?: boolean;
 };

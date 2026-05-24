@@ -42,6 +42,7 @@ Database:
 ```bash
 pnpm --filter @workspace/db push
 pnpm --filter @workspace/scripts seed:categories
+pnpm --filter @workspace/scripts seed:demo
 ```
 
 OpenAPI clients:
@@ -72,11 +73,13 @@ The frontend build currently emits a non-blocking large chunk warning. Code spli
 - Backend should deploy as a Node service from `artifacts/api-server`.
 - Set `VITE_API_BASE_URL` when frontend and API are on different origins.
 - Set `VITE_DEMO_MODE=false` for production so demo/local fallback auth does not mask API problems.
+- Creator banner/PFP uploads are currently frontend preview-ready. Production should add storage-backed upload endpoints and persist banner URLs to `creator_profiles.banner_url`.
 - Use `STREAM_PROVIDER=stub` only for local development.
 - Do not deploy without production `AUTH_SECRET` and `ENCRYPTION_KEY`.
 
 ## Documentation
 
 - `BACKEND_ADAPTATION_REPORT.md`
+- `PRODUCTION_HANDOFF_REPORT.md`
 - `artifacts/loot-tv/FRONTEND_HANDOFF.md`
 - `PRODUCTION_READINESS.md`

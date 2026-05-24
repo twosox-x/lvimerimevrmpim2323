@@ -26,11 +26,13 @@ router.get("/readiness", (_req, res) => {
       auth: config.authSecret ? "configured" : "development fallback",
       encryption: config.encryptionKey ? "configured" : "development fallback",
       streaming: streamingConfigured ? config.streamProvider : `unconfigured ${config.streamProvider}`,
+      streamWebhooks: config.streamWebhookSecret ? "configured" : "development fallback",
       payments: paymentsConfigured ? "configured" : "missing Base RPC and/or L00T token",
     },
     warnings: [
       ...(usingLocalSecrets ? ["AUTH_SECRET and ENCRYPTION_KEY must be set outside local development."] : []),
       ...(config.streamProvider === "stub" ? ["STREAM_PROVIDER=stub is for local development only."] : []),
+      ...(!config.streamWebhookSecret ? ["STREAM_WEBHOOK_SECRET should be set before provider webhooks are enabled."] : []),
       ...(!paymentsConfigured ? ["Payment verification requires BASE_RPC_URL and L00T_TOKEN_ADDRESS."] : []),
     ],
   });

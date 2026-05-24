@@ -21,7 +21,7 @@ export default function HomePage() {
       <div className="flex flex-col gap-8 sm:gap-10 md:gap-12 pb-12">
         {/* Hero Section */}
         <section className="relative pt-2 sm:pt-6 lg:pt-10 pb-1">
-          <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 items-start sm:items-center justify-between w-full overflow-hidden">
+          <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 items-start sm:items-center justify-between w-full overflow-visible sm:overflow-hidden">
             {/* Mobile: mascot leads the hero */}
             <div className="loot-hero-mascot loot-hero-mascot-mobile flex relative items-center justify-center w-full flex-shrink-0 sm:hidden">
               <img

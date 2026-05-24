@@ -299,6 +299,31 @@ export const RegenerateStreamKeyResponse = zod.object({
 })
 
 
+export const StreamStatusWebhookHeader = zod.object({
+  "x-loot-signature": zod.string().optional()
+})
+
+export const StreamStatusWebhookBody = zod.object({
+  "provider": zod.string(),
+  "providerStreamId": zod.string(),
+  "event": zod.enum(['live', 'ended', 'offline']),
+  "playbackUrl": zod.string().optional(),
+  "viewerCount": zod.number().optional()
+})
+
+export const StreamStatusWebhookResponse = zod.object({
+  "ok": zod.boolean(),
+  "stream": zod.object({
+  "id": zod.string(),
+  "creatorId": zod.string(),
+  "title": zod.string(),
+  "accessType": zod.enum(['public', 'subscribers']),
+  "status": zod.enum(['offline', 'live', 'ended']),
+  "playbackUrl": zod.string().nullish()
+})
+})
+
+
 export const GetStreamChatParams = zod.object({
   "id": zod.coerce.string()
 })
@@ -378,6 +403,25 @@ export const VerifySubscriptionBody = zod.object({
 })
 
 
+export const UpdateMySubscriptionPlanBody = zod.object({
+  "durationDays": zod.number().optional(),
+  "ethPrice": zod.string().optional(),
+  "lootPrice": zod.string().optional(),
+  "lootTokenAddress": zod.string().optional(),
+  "isActive": zod.boolean().optional()
+})
+
+export const UpdateMySubscriptionPlanResponse = zod.object({
+  "plan": zod.object({
+  "id": zod.string().optional(),
+  "durationDays": zod.number().optional(),
+  "ethPrice": zod.string().optional(),
+  "lootPrice": zod.string().optional(),
+  "isActive": zod.boolean().optional()
+})
+})
+
+
 export const GetMySubscriptionsResponse = zod.object({
   "subscriptions": zod.array(zod.object({
   "id": zod.string(),
@@ -397,7 +441,8 @@ export const GetSubscriptionStatusResponse = zod.object({
   "id": zod.string().optional(),
   "durationDays": zod.number().optional(),
   "ethPrice": zod.string().optional(),
-  "lootPrice": zod.string().optional()
+  "lootPrice": zod.string().optional(),
+  "isActive": zod.boolean().optional()
 }).optional()
 })
 
@@ -434,6 +479,20 @@ export const GetCreatorSubscribersParams = zod.object({
 
 export const GetCreatorSubscribersResponse = zod.object({
   "subscribers": zod.array(zod.object({
+  "id": zod.string(),
+  "status": zod.string(),
+  "expiresAt": zod.string().optional()
+}))
+})
+
+
+export const GetCreatorSupportersParams = zod.object({
+  "username": zod.coerce.string()
+})
+
+export const GetCreatorSupportersResponse = zod.object({
+  "topDonors": zod.array(zod.record(zod.string(), zod.unknown())),
+  "activeSubscribers": zod.array(zod.object({
   "id": zod.string(),
   "status": zod.string(),
   "expiresAt": zod.string().optional()

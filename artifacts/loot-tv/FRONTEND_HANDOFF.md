@@ -52,10 +52,22 @@ Dashboard loops are preserved and partially connected:
 - start/end calls `/api/streams/:id/start` and `/api/streams/:id/end`
 - stream key is shown only in dashboard state returned by owner-only routes
 - profile update attempts `PATCH /api/creators/me`
+- profile settings include display name, bio, channel color circles, and local banner image upload
+- if no banner image is uploaded, the creator channel banner uses the selected channel color
+- uploaded banner images are stored in local preview state as `bannerUrl`; backend handoff should persist this to `creator_profiles.banner_url`
 - post publishing attempts `POST /api/posts`
+- subscription plan updates should call `PATCH /api/subscription-plans/me`
+- supporter dashboards can read `GET /api/creators/:username/supporters`
 - local state fallback remains for Vercel static previews
 
 The dashboard includes RTMP URL, stream key show/hide, copy controls, and the “Never share” warning.
+
+## Profile Visual State
+
+- Default creator/viewer profile images now use `/PFP.jpg` from `artifacts/loot-tv/public/PFP.jpg`.
+- Creator cards, stream cards, sidebar identity, stream room identity, and creator profiles all fall back to the same default PFP.
+- The owner channel at `/creator/:username` reads local dashboard/AuthContext state, so display name, bio, channel color, banner upload, stream title/category, and posts reflect dashboard edits in preview mode.
+- The Profile Settings tab intentionally omits wallet/receive-address details; monetization/payment settings own that information.
 
 ## Payments
 
@@ -64,6 +76,8 @@ The dashboard includes RTMP URL, stream key show/hide, copy controls, and the �
 - `POST /api/donations/verify`
 - `POST /api/subscriptions/verify`
 - `GET /api/creators/:username/subscription-status`
+- `PATCH /api/subscription-plans/me`
+- `GET /api/creators/:username/supporters`
 
 Next frontend step: wire modal success to wallet transaction submission, then send tx hash to the backend verification endpoints.
 

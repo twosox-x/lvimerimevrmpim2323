@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { DEMO_MODE, apiRequest } from "@/lib/api";
+import { DEFAULT_PROFILE_PICTURE } from "@/data/creators";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -17,6 +18,7 @@ export interface AuthUser {
   username: string;
   displayName: string;
   avatarUrl: string;
+  bannerUrl?: string;
   bannerGradient: string;
   channelColor: string;
   isCreator: boolean;
@@ -75,13 +77,6 @@ const LS_USER = "loot_auth_user";
 const LS_WALLET = "loot_mock_wallet";
 const LS_POSTS = "loot_creator_posts";
 
-const AVATAR_PRESETS = [
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=viewer1",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=viewer2",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=creator1",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=creator2",
-];
-
 const BANNER_PRESETS = [
   "bg-gradient-to-r from-blue-600 to-cyan-400",
   "bg-gradient-to-r from-purple-600 to-indigo-500",
@@ -103,7 +98,9 @@ function shortWallet(addr: string): string {
 function loadUser(): AuthUser | null {
   try {
     const raw = localStorage.getItem(LS_USER);
-    return raw ? (JSON.parse(raw) as AuthUser) : null;
+    if (!raw) return null;
+    const user = JSON.parse(raw) as AuthUser;
+    return { ...user, avatarUrl: user.avatarUrl || DEFAULT_PROFILE_PICTURE };
   } catch {
     return null;
   }
@@ -228,7 +225,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         walletAddress: wallet,
         username: data.username,
         displayName: data.displayName,
-        avatarUrl: AVATAR_PRESETS[Math.floor(Math.random() * 2)],
+        avatarUrl: DEFAULT_PROFILE_PICTURE,
+        bannerUrl: "",
         bannerGradient: BANNER_PRESETS[0],
         channelColor: "#38bdf8",
         isCreator: false,
@@ -258,7 +256,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         walletAddress: wallet,
         username: data.username,
         displayName: data.displayName,
-        avatarUrl: AVATAR_PRESETS[2 + Math.floor(Math.random() * 2)],
+        avatarUrl: DEFAULT_PROFILE_PICTURE,
+        bannerUrl: "",
         bannerGradient: BANNER_PRESETS[Math.floor(Math.random() * BANNER_PRESETS.length)],
         channelColor: data.channelColor || "#38bdf8",
         isCreator: true,

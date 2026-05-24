@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { DEFAULT_PROFILE_PICTURE } from "@/data/creators";
 
 export function CreatorCard({ creator }: { creator: any }) {
   return (
@@ -15,7 +16,7 @@ export function CreatorCard({ creator }: { creator: any }) {
           className="creator-card-avatar w-16 h-16 rounded-full border-4 border-background bg-zinc-800 -mt-8 mb-3 z-10 overflow-hidden transition-transform duration-300 group-hover:scale-110"
           style={{ borderColor: creator.channelColor || "#18181b" }}
         >
-          <img src={creator.avatar} className="w-full h-full object-cover" alt={creator.displayName} />
+          <img src={creator.avatar || DEFAULT_PROFILE_PICTURE} className="w-full h-full object-cover" alt={creator.displayName} />
         </div>
         <div className="creator-card-copy min-w-0">
           <h3 className="font-bold text-base sm:text-lg text-white truncate">{creator.displayName}</h3>

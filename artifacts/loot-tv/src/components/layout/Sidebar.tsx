@@ -5,6 +5,7 @@ import {
   PlusSquare, LogOut, Wallet, Video,
 } from "lucide-react";
 import { useAuth, shortWallet } from "@/context/AuthContext";
+import { DEFAULT_PROFILE_PICTURE } from "@/data/creators";
 
 export function Sidebar() {
   const [location] = useLocation();
@@ -115,12 +116,14 @@ export function Sidebar() {
               )}
 
               {/* User info */}
-              <div className="flex items-center p-2.5 gap-3 rounded-lg overflow-hidden">
-                <img
-                  src={user.avatarUrl}
-                  alt={user.displayName}
-                  className="w-8 h-8 rounded-full flex-shrink-0 border border-white/10"
-                />
+              <div className="flex items-center h-11 px-1.5 group-hover:px-2.5 gap-3 rounded-lg overflow-hidden min-w-0 transition-[padding] duration-300">
+                <div className="w-8 h-8 min-w-8 min-h-8 shrink-0 rounded-full border border-white/10 overflow-hidden bg-zinc-900">
+                  <img
+                    src={user.avatarUrl || DEFAULT_PROFILE_PICTURE}
+                    alt={user.displayName}
+                    className="block w-full h-full aspect-square object-cover"
+                  />
+                </div>
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 min-w-0">
                   <p className="text-white text-xs font-bold truncate">{user.displayName}</p>
                   <p className="text-zinc-500 text-xs font-mono">{shortWallet(user.walletAddress)}</p>
@@ -182,7 +185,9 @@ export function Sidebar() {
         {isLoggedIn ? (
           <Link href={isCreator ? "/dashboard" : "/creators"}>
             <div className="flex flex-col items-center justify-center p-2 text-zinc-400">
-              <img src={user?.avatarUrl} className="w-5 h-5 rounded-full mb-1" alt="avatar" />
+              <div className="w-5 h-5 min-w-5 min-h-5 shrink-0 rounded-full mb-1 overflow-hidden bg-zinc-900">
+                <img src={user?.avatarUrl || DEFAULT_PROFILE_PICTURE} className="block w-full h-full aspect-square object-cover" alt="avatar" />
+              </div>
               <span className="text-[10px] font-medium truncate max-w-[48px]">{user?.displayName}</span>
             </div>
           </Link>

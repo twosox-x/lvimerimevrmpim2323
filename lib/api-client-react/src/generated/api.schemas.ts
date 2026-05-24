@@ -208,6 +208,23 @@ export interface DonationVerifyRequest {
   message?: string;
 }
 
+export type StreamStatusWebhookRequestEvent = typeof StreamStatusWebhookRequestEvent[keyof typeof StreamStatusWebhookRequestEvent];
+
+
+export const StreamStatusWebhookRequestEvent = {
+  live: 'live',
+  ended: 'ended',
+  offline: 'offline',
+} as const;
+
+export interface StreamStatusWebhookRequest {
+  provider: string;
+  providerStreamId: string;
+  event: StreamStatusWebhookRequestEvent;
+  playbackUrl?: string;
+  viewerCount?: number;
+}
+
 export type SubscriptionVerifyRequestPaymentToken = typeof SubscriptionVerifyRequestPaymentToken[keyof typeof SubscriptionVerifyRequestPaymentToken];
 
 
@@ -241,8 +258,17 @@ export interface SubscriptionPlan {
   durationDays?: number;
   ethPrice?: string;
   lootPrice?: string;
+  isActive?: boolean;
   [key: string]: unknown;
  }
+
+export interface SubscriptionPlanInput {
+  durationDays?: number;
+  ethPrice?: string;
+  lootPrice?: string;
+  lootTokenAddress?: string;
+  isActive?: boolean;
+}
 
 export type StatsResponseStats = { [key: string]: unknown };
 
@@ -291,6 +317,11 @@ export type GetStream200 = {
   locked: boolean;
 };
 
+export type StreamStatusWebhook200 = {
+  ok: boolean;
+  stream: Stream;
+};
+
 export type GetStreamChat200 = {
   messages: ChatMessage[];
 };
@@ -313,10 +344,16 @@ export type UpdatePost200 = {
 
 export type VerifyDonation201 = {
   donation: Donation;
+  idempotent?: boolean;
 };
 
 export type VerifySubscription201 = {
   subscription: Subscription;
+  idempotent?: boolean;
+};
+
+export type UpdateMySubscriptionPlan200 = {
+  plan: SubscriptionPlan;
 };
 
 export type GetMySubscriptions200 = {
@@ -338,6 +375,13 @@ export type GetStreamDonations200 = {
 
 export type GetCreatorSubscribers200 = {
   subscribers: Subscription[];
+};
+
+export type GetCreatorSupporters200TopDonorsItem = { [key: string]: unknown };
+
+export type GetCreatorSupporters200 = {
+  topDonors: GetCreatorSupporters200TopDonorsItem[];
+  activeSubscribers: Subscription[];
 };
 
 export type GetCreatorStreamKey200 = {

@@ -7,10 +7,13 @@ export const config = {
   appUrl: process.env.APP_URL ?? "http://localhost:5173",
   corsOrigin: process.env.CORS_ORIGIN ?? process.env.APP_URL ?? "http://localhost:5173",
   authSecret: process.env.AUTH_SECRET ?? process.env.JWT_SECRET ?? "",
+  cookieDomain: process.env.COOKIE_DOMAIN ?? "",
+  cookieSameSite: (process.env.COOKIE_SAMESITE ?? "lax") as "lax" | "strict" | "none",
   baseRpcUrl: process.env.BASE_RPC_URL ?? "",
   baseChainId: Number(process.env.BASE_CHAIN_ID ?? "8453"),
   lootTokenAddress: process.env.L00T_TOKEN_ADDRESS ?? "",
   streamProvider: (process.env.STREAM_PROVIDER ?? "stub") as StreamProviderName,
+  streamWebhookSecret: process.env.STREAM_WEBHOOK_SECRET ?? "",
   encryptionKey: process.env.ENCRYPTION_KEY ?? "",
   livekit: {
     url: process.env.LIVEKIT_API_URL ?? process.env.LIVEKIT_URL ?? "",

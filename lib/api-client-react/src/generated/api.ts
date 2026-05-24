@@ -32,6 +32,7 @@ import type {
   GetCreatorPosts200,
   GetCreatorStreamKey200,
   GetCreatorSubscribers200,
+  GetCreatorSupporters200,
   GetCreators200,
   GetCreatorsParams,
   GetMySubscriptions200,
@@ -51,7 +52,11 @@ import type {
   StatsResponse,
   StreamInput,
   StreamResponse,
+  StreamStatusWebhook200,
+  StreamStatusWebhookRequest,
+  SubscriptionPlanInput,
   SubscriptionVerifyRequest,
+  UpdateMySubscriptionPlan200,
   UpdatePost200,
   UserResponse,
   VerifyDonation201,
@@ -1507,6 +1512,71 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getRegenerateStreamKeyMutationOptions(options));
     }
 
+export const getStreamStatusWebhookUrl = () => {
+
+
+
+
+  return `/api/stream-webhooks/status`
+}
+
+export const streamStatusWebhook = async (streamStatusWebhookRequest: StreamStatusWebhookRequest, options?: RequestInit): Promise<StreamStatusWebhook200> => {
+
+  return customFetch<StreamStatusWebhook200>(getStreamStatusWebhookUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      streamStatusWebhookRequest,)
+  }
+);}
+
+
+
+
+export const getStreamStatusWebhookMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof streamStatusWebhook>>, TError,{data: BodyType<StreamStatusWebhookRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof streamStatusWebhook>>, TError,{data: BodyType<StreamStatusWebhookRequest>}, TContext> => {
+
+const mutationKey = ['streamStatusWebhook'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof streamStatusWebhook>>, {data: BodyType<StreamStatusWebhookRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  streamStatusWebhook(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StreamStatusWebhookMutationResult = NonNullable<Awaited<ReturnType<typeof streamStatusWebhook>>>
+    export type StreamStatusWebhookMutationBody = BodyType<StreamStatusWebhookRequest>
+    export type StreamStatusWebhookMutationError = ErrorType<unknown>
+
+    export const useStreamStatusWebhook = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof streamStatusWebhook>>, TError,{data: BodyType<StreamStatusWebhookRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof streamStatusWebhook>>,
+        TError,
+        {data: BodyType<StreamStatusWebhookRequest>},
+        TContext
+      > => {
+      return useMutation(getStreamStatusWebhookMutationOptions(options));
+    }
+
 export const getGetStreamChatUrl = (id: string,) => {
 
 
@@ -1969,6 +2039,71 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getVerifySubscriptionMutationOptions(options));
     }
 
+export const getUpdateMySubscriptionPlanUrl = () => {
+
+
+
+
+  return `/api/subscription-plans/me`
+}
+
+export const updateMySubscriptionPlan = async (subscriptionPlanInput: SubscriptionPlanInput, options?: RequestInit): Promise<UpdateMySubscriptionPlan200> => {
+
+  return customFetch<UpdateMySubscriptionPlan200>(getUpdateMySubscriptionPlanUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      subscriptionPlanInput,)
+  }
+);}
+
+
+
+
+export const getUpdateMySubscriptionPlanMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMySubscriptionPlan>>, TError,{data: BodyType<SubscriptionPlanInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateMySubscriptionPlan>>, TError,{data: BodyType<SubscriptionPlanInput>}, TContext> => {
+
+const mutationKey = ['updateMySubscriptionPlan'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMySubscriptionPlan>>, {data: BodyType<SubscriptionPlanInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateMySubscriptionPlan(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateMySubscriptionPlanMutationResult = NonNullable<Awaited<ReturnType<typeof updateMySubscriptionPlan>>>
+    export type UpdateMySubscriptionPlanMutationBody = BodyType<SubscriptionPlanInput>
+    export type UpdateMySubscriptionPlanMutationError = ErrorType<unknown>
+
+    export const useUpdateMySubscriptionPlan = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMySubscriptionPlan>>, TError,{data: BodyType<SubscriptionPlanInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateMySubscriptionPlan>>,
+        TError,
+        {data: BodyType<SubscriptionPlanInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateMySubscriptionPlanMutationOptions(options));
+    }
+
 export const getGetMySubscriptionsUrl = () => {
 
 
@@ -2312,6 +2447,77 @@ export function useGetCreatorSubscribers<TData = Awaited<ReturnType<typeof getCr
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetCreatorSubscribersQueryOptions(username,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetCreatorSupportersUrl = (username: string,) => {
+
+
+
+
+  return `/api/creators/${username}/supporters`
+}
+
+export const getCreatorSupporters = async (username: string, options?: RequestInit): Promise<GetCreatorSupporters200> => {
+
+  return customFetch<GetCreatorSupporters200>(getGetCreatorSupportersUrl(username),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCreatorSupportersQueryKey = (username: string,) => {
+    return [
+    `/api/creators/${username}/supporters`
+    ] as const;
+    }
+
+
+export const getGetCreatorSupportersQueryOptions = <TData = Awaited<ReturnType<typeof getCreatorSupporters>>, TError = ErrorType<unknown>>(username: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCreatorSupporters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCreatorSupportersQueryKey(username);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCreatorSupporters>>> = ({ signal }) => getCreatorSupporters(username, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(username), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCreatorSupporters>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCreatorSupportersQueryResult = NonNullable<Awaited<ReturnType<typeof getCreatorSupporters>>>
+export type GetCreatorSupportersQueryError = ErrorType<unknown>
+
+
+
+export function useGetCreatorSupporters<TData = Awaited<ReturnType<typeof getCreatorSupporters>>, TError = ErrorType<unknown>>(
+ username: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCreatorSupporters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCreatorSupportersQueryOptions(username,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

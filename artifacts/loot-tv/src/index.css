@@ -199,7 +199,7 @@
 .loot-hero-title {
   font-size: 2.25rem;
   line-height: 0.98;
-  max-width: 10ch;
+  max-width: 100%;
 }
 
 .loot-hero-copy {
@@ -221,7 +221,7 @@
   margin-left: auto;
   margin-right: auto;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .loot-hero-mascot img {
@@ -229,8 +229,14 @@
 }
 
 .loot-hero-mascot-mobile {
-  margin-top: -0.5rem;
-  margin-bottom: -0.75rem;
+  height: 216px;
+  margin-top: 0;
+  margin-bottom: -0.35rem;
+  padding-block: 1.2rem;
+}
+
+.loot-hero-mascot-mobile img {
+  max-height: 220px;
 }
 
 .categories-mobile-grid {
@@ -319,7 +325,8 @@
 
 @media (min-width: 390px) {
   .loot-hero-title {
-    font-size: 2.75rem;
+    font-size: 2.65rem;
+    line-height: 0.96;
   }
 
   .loot-hero-actions {
@@ -327,11 +334,11 @@
   }
 
   .loot-hero-mascot {
-    height: 198px;
+    height: 224px;
   }
 
   .loot-hero-mascot img {
-    max-height: 208px;
+    max-height: 224px;
   }
 }
 
